@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0f1b2d" />
+<title>MyBiz News</title>
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="MyBiz News" />
+<style>
+  :root{
+    --navy:#0f1b2d; --navy2:#16263f; --ink:#14181f; --sub:#5b6470;
+    --line:#e7e9ee; --bg:#f6f7f9; --card:#ffffff; --accent:#c0392b; --chip:#eef1f6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+    color:var(--ink);background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:76px;
+  }
+  a{color:inherit}
+  .wrap{max-width:720px;margin:0 auto}
+  /* header */
+  header{
+    position:sticky;top:0;z-index:50;background:var(--navy);color:#fff;
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  }
+  .hrow{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:24px;letter-spacing:.02em}
+  .brand small{display:block;font-family:sans-serif;font-weight:400;font-size:11px;opacity:.7;letter-spacing:.25em;margin-top:2px}
+  .refresh{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:20px;padding:8px 14px;font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer}
+  .refresh:active{transform:scale(.96)}
+  .updated{max-width:720px;margin:6px auto 0;font-size:11px;opacity:.6;color:#fff}
+  /* tabs */
+  .tabs{display:flex;background:var(--navy2)}
+  .tabs button{flex:1;background:none;border:0;color:#cbd3df;padding:11px 0;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent}
+  .tabs button.on{color:#fff;border-bottom-color:var(--accent)}
+  /* list */
+  .list{padding:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px;cursor:pointer;transition:transform .06s}
+  .card:active{transform:scale(.99)}
+  .thumb{width:100%;height:170px;object-fit:cover;display:block;background:#dde3ec}
+  .ph{width:100%;height:150px;display:flex;align-items:flex-end;padding:12px;color:#fff}
+  .ph .g{font-size:13px;font-weight:700;opacity:.95}
+  .cbody{padding:12px 14px 14px}
+  .chip{display:inline-block;background:var(--chip);color:#39424f;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:8px}
+  .htitle{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:17px;line-height:1.4;margin:0 0 6px}
+  .sum{font-size:13px;color:var(--sub);line-height:1.55;margin:0}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11px;color:#98a0ab}
+  .save-mini{border:0;background:none;font-size:20px;line-height:1;cursor:pointer;color:#c9ced6}
+  .save-mini.on{color:var(--accent)}
+  /* detail */
+  .detail{display:none;background:var(--bg);position:fixed;inset:0;overflow-y:auto;z-index:60;-webkit-overflow-scrolling:touch}
+  .detail.on{display:block}
+  .dhead{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 10px 10px;display:flex;align-items:center;gap:8px}
+  .back{border:0;background:#eef1f6;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600;cursor:pointer}
+  .dwrap{max-width:720px;margin:0 auto;padding:0 0 40px}
+  .dimg{width:100%;height:230px;object-fit:cover;display:block;background:#dde3ec}
+  .dph{width:100%;height:180px;display:flex;align-items:flex-end;padding:16px;color:#fff}
+  .credit{font-size:10.5px;color:#a6adb7;padding:6px 16px 0}
+  .credit a{color:#8b93a0;text-decoration:underline}
+  .dcontent{padding:8px 18px 0}
+  .dtitle{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:23px;line-height:1.45;margin:12px 0 8px}
+  .dmeta{font-size:12px;color:var(--sub);border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+  .dsum{background:#fff;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.65;color:#2b323c;margin-bottom:18px}
+  .body h2{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-size:17px;border-left:4px solid var(--navy);padding-left:9px;margin:22px 0 8px}
+  .body h3{font-size:15px;margin:16px 0 6px}
+  .body p{font-size:14.5px;line-height:1.85;margin:0 0 12px;color:#2a3038}
+  .body ul{padding-left:20px;margin:0 0 12px}
+  .body li{font-size:14.5px;line-height:1.8;margin-bottom:4px}
+  .sources{margin:18px 0;padding:14px;background:#fff;border:1px solid var(--line);border-radius:10px}
+  .sources h4{margin:0 0 8px;font-size:13px;color:var(--sub)}
+  .sources a{display:block;font-size:13px;color:#1f5fa8;text-decoration:none;padding:4px 0;word-break:break-all}
+  .actions{display:flex;gap:10px;margin:16px 0}
+  .btn{flex:1;border:0;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-save{background:#fff;border:1.5px solid var(--accent);color:var(--accent)}
+  .btn-save.on{background:var(--accent);color:#fff}
+  /* AI */
+  .ai{margin:20px 0 10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .ai h4{margin:0 0 4px;font-size:14px;display:flex;align-items:center;gap:6px}
+  .ai .note{font-size:11px;color:#9aa2ad;margin:0 0 10px}
+  .qchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .qchips button{background:var(--chip);border:0;border-radius:16px;padding:6px 11px;font-size:12px;cursor:pointer;color:#39424f}
+  .airow{display:flex;gap:8px}
+  .airow input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px}
+  .airow button{border:0;background:var(--navy);color:#fff;border-radius:10px;padding:0 16px;font-size:14px;font-weight:700;cursor:pointer}
+  .airow button:disabled{opacity:.5}
+  .aians{margin-top:12px;font-size:14px;line-height:1.7;color:#2a3038;white-space:pre-wrap}
+  .aians:empty{display:none}
+  .thinking{color:#9aa2ad;font-size:13px}
+  /* empty */
+  .empty{text-align:center;color:#9aa2ad;padding:70px 20px;font-size:14px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#14181f;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
+  .toast.show{opacity:.95}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="brand">MyBiz News<small>NEW BUSINESS DAILY</small></div>
+    <button class="refresh" id="refreshBtn">⟳ 更新</button>
+  </div>
+  <div class="updated" id="updated"></div>
+</header>
+<div class="tabs">
+  <button id="tabAll" class="on">記事</button>
+  <button id="tabSaved">保存した記事</button>
+</div>
+
+<div id="listView" class="wrap">
+  <div class="list" id="list"></div>
+</div>
+
+<div class="detail" id="detail">
+  <div class="dhead"><button class="back" id="backBtn">← 一覧へ</button></div>
+  <div class="dwrap" id="detailBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 設定 ============ */
+const DATA_URL   = "./articles.json";                                             // 同じリポジトリのデータ
+const DATA_FALLBACK = "https://raw.githubusercontent.com/0617Tadahiro/mybiz-news-data/main/articles.json";
+const AI_ENDPOINT = "";   // ← CloudflareのWorkerを作ったら、ここにそのURLを入れる（例: https://xxx.workers.dev）
+const SAVE_KEY = "mybiz_saved_v1";
+
+/* ============ 状態 ============ */
+let ARTICLES = [];
+let saved = loadSaved();
+
+/* ============ ユーティリティ ============ */
+function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)||"[]"); }catch(e){ return []; } }
+function persist(){ localStorage.setItem(SAVE_KEY, JSON.stringify(saved)); }
+function isSaved(id){ return saved.some(a=>a.id===id); }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); }
+function gradient(seed){ const h=[...(seed||"x")].reduce((a,c)=>a+c.charCodeAt(0),0); const a=h%360,b=(a+40)%360; return `linear-gradient(135deg,hsl(${a} 45% 32%),hsl(${b} 55% 22%))`; }
+
+/* 簡易マークダウン → HTML */
+function md(src){
+  const lines=(src||"").split(/\r?\n/); let html=""; let inList=false;
+  const inline=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  for(let ln of lines){
+    if(/^\s*##\s+/.test(ln)){ if(inList){html+="</ul>";inList=false;} html+="<h2>"+inline(ln.replace(/^\s*##\s+/,""))+"</h2>"; continue; }
+    if(/^\s*###\s+/.test(ln)){ if(inList){html+="</ul>";inList=false;} html+="<h3>"+inline(ln.replace(/^\s*###\s+/,""))+"</h3>"; continue; }
+    if(/^\s*[-・]\s+/.test(ln)){ if(!inList){html+="<ul>";inList=true;} html+="<li>"+inline(ln.replace(/^\s*[-・]\s+/,""))+"</li>"; continue; }
+    if(/^\s*$/.test(ln)){ if(inList){html+="</ul>";inList=false;} continue; }
+    if(inList){html+="</ul>";inList=false;}
+    html+="<p>"+inline(ln)+"</p>";
+  }
+  if(inList)html+="</ul>";
+  return html;
+}
+
+/* ============ データ取得 ============ */
+async function fetchData(url){
+  const r = await fetch(url + (url.includes("?")?"&":"?") + "t=" + Date.now(), {cache:"no-store"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function load(showToast){
+  try{
+    let d;
+    try{ d = await fetchData(DATA_URL); }
+    catch(e){ d = await fetchData(DATA_FALLBACK); }
+    ARTICLES = d.articles || [];
+    localStorage.setItem("mybiz_cache", JSON.stringify(d));
+    document.getElementById("updated").textContent = "最終更新 " + fmt(d.generated_at) + "・" + ARTICLES.length + "件";
+    render();
+    if(showToast) toast("最新に更新しました");
+  }catch(e){
+    const c = localStorage.getItem("mybiz_cache");
+    if(c){ ARTICLES = JSON.parse(c).articles||[]; render(); toast("オフライン：保存済みを表示"); }
+    else { document.getElementById("list").innerHTML = '<div class="empty">記事を読み込めませんでした。<br>通信環境を確認して「更新」を押してください。</div>'; }
+  }
+}
+function fmt(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return iso.slice(0,10); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
+function fmtd(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return iso.slice(0,10); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+
+/* ============ 一覧描画 ============ */
+let mode="all";
+function render(){
+  const items = mode==="saved" ? saved : ARTICLES;
+  const el = document.getElementById("list");
+  if(!items.length){
+    el.innerHTML = mode==="saved"
+      ? '<div class="empty">まだ保存した記事はありません。<br>記事の「保存」ボタンで後で読めます。</div>'
+      : '<div class="empty">記事がありません。「更新」を押してください。</div>';
+    return;
+  }
+  el.innerHTML = items.map(a=>{
+    const img = a.image_url
+      ? `<img class="thumb" src="${esc(a.image_url)}" loading="lazy" onerror="this.outerHTML='<div class=\\'ph\\' style=\\'background:${gradient(a.headline)}\\'><span class=\\'g\\'>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>'">`
+      : `<div class="ph" style="background:${gradient(a.headline)}"><span class="g">${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>`;
+    return `<div class="card" onclick="openDetail('${a.id}')">
+      ${img}
+      <div class="cbody">
+        <span class="chip">${esc(a.category||'')}</span>
+        <h3 class="htitle">${esc(a.headline)}</h3>
+        <p class="sum">${esc(a.summary_short||'')}</p>
+        <div class="meta"><span>${esc(a.source_name||'')}・${fmtd(a.datetime)}</span>
+        <button class="save-mini ${isSaved(a.id)?'on':''}" onclick="event.stopPropagation();toggleSave('${a.id}')">${isSaved(a.id)?'★':'☆'}</button></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ============ 詳細 ============ */
+function openDetail(id){
+  const a = (ARTICLES.find(x=>x.id===id)) || (saved.find(x=>x.id===id));
+  if(!a)return;
+  const img = a.image_url
+    ? `<img class="dimg" src="${esc(a.image_url)}" onerror="this.outerHTML='<div class=\\'dph\\' style=\\'background:${gradient(a.headline)}\\'></div>'">`
+    : `<div class="dph" style="background:${gradient(a.headline)}"></div>`;
+  const credit = a.image_credit
+    ? `<div class="credit">📷 ${a.image_source_url?`<a href="${esc(a.image_source_url)}" target="_blank" rel="noopener">${esc(a.image_credit)}</a>`:esc(a.image_credit)}</div>` : "";
+  const srcs = (a.sources&&a.sources.length? a.sources : (a.source_url?[{name:a.source_name,url:a.source_url}]:[]))
+    .map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">🔗 ${esc(s.name||s.url)}</a>`).join("");
+  document.getElementById("detailBody").innerHTML = `
+    ${img}${credit}
+    <div class="dcontent">
+      <span class="chip">${esc(a.category||'')}</span>
+      <h1 class="dtitle">${esc(a.headline)}</h1>
+      <div class="dmeta">${esc(a.source_name||'')}　|　${fmtd(a.datetime)}</div>
+      <div class="dsum">${esc(a.summary_long||a.summary_short||'')}</div>
+      <div class="body">${md(a.body)}</div>
+      ${srcs?`<div class="sources"><h4>出典</h4>${srcs}</div>`:""}
+      <div class="actions">
+        <button class="btn btn-save ${isSaved(a.id)?'on':''}" id="saveBtn" onclick="toggleSave('${a.id}',true)">${isSaved(a.id)?'★ 保存済み':'☆ 保存する'}</button>
+      </div>
+      <div class="ai">
+        <h4>🤖 この記事についてAIに質問</h4>
+        <p class="note">${AI_ENDPOINT? "気になる点を聞くと、記事内容をもとにAIが答えます。":"AI機能は準備中です（設定が完了すると使えます）。"}</p>
+        <div class="qchips">
+          <button onclick="ask('この記事の要点を3つ教えて','${a.id}')">要点は？</button>
+          <button onclick="ask('この事業の市場規模や成長性は？','${a.id}')">市場規模は？</button>
+          <button onclick="ask('似たビジネスや競合を教えて','${a.id}')">似た事業は？</button>
+          <button onclick="ask('自分が新規事業に応用するとしたら？','${a.id}')">応用アイデア</button>
+        </div>
+        <div class="airow">
+          <input id="aiInput" placeholder="質問を入力…" onkeydown="if(event.key==='Enter')ask(this.value,'${a.id}')">
+          <button id="aiBtn" onclick="ask(document.getElementById('aiInput').value,'${a.id}')">質問</button>
+        </div>
+        <div class="aians" id="aiAns"></div>
+      </div>
+    </div>`;
+  document.getElementById("detail").classList.add("on");
+  window.scrollTo(0,0);
+}
+function closeDetail(){ document.getElementById("detail").classList.remove("on"); }
+
+/* ============ 保存 ============ */
+function toggleSave(id, inDetail){
+  const a = ARTICLES.find(x=>x.id===id) || saved.find(x=>x.id===id);
+  if(!a)return;
+  if(isSaved(id)){ saved = saved.filter(x=>x.id!==id); toast("保存を解除しました"); }
+  else { saved.unshift(a); toast("保存しました"); }
+  persist();
+  render();
+  if(inDetail){ const b=document.getElementById("saveBtn"); if(b){ b.className="btn btn-save "+(isSaved(id)?"on":""); b.textContent=isSaved(id)?"★ 保存済み":"☆ 保存する"; } }
+}
+
+/* ============ AI質問 ============ */
+async function ask(q, id){
+  q=(q||"").trim(); if(!q)return;
+  const ans=document.getElementById("aiAns");
+  if(!AI_ENDPOINT){ ans.textContent="⚠️ AI機能はまだ設定されていません。設定が完了すると、ここに回答が表示されます。"; return; }
+  const a = ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id)||{};
+  ans.innerHTML='<span class="thinking">AIが考えています…</span>';
+  try{
+    const r = await fetch(AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({question:q, title:a.headline, context:(a.summary_long||"")+"\n\n"+(a.body||"")})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const d = await r.json();
+    ans.textContent = d.answer || d.text || "（回答を取得できませんでした）";
+  }catch(e){ ans.textContent="通信エラーで回答できませんでした。少し待って再度お試しください。"; }
+}
+
+/* ============ タブ / イベント ============ */
+document.getElementById("tabAll").onclick=()=>{mode="all";document.getElementById("tabAll").classList.add("on");document.getElementById("tabSaved").classList.remove("on");render();};
+document.getElementById("tabSaved").onclick=()=>{mode="saved";document.getElementById("tabSaved").classList.add("on");document.getElementById("tabAll").classList.remove("on");render();};
+document.getElementById("backBtn").onclick=closeDetail;
+document.getElementById("refreshBtn").onclick=()=>load(true);
+window.openDetail=openDetail; window.toggleSave=toggleSave; window.ask=ask;
+
+/* 起動 */
+load(false);
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
