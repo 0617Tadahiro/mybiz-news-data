@@ -145,14 +145,24 @@ function md(src){
   return html;
 }
 
-/* 掲載日の新しい順に並べる（日付が無いものは末尾、元の並び順は保つ） */
-function sortByDate(list){
+/* 掲載順に並べる＝「アプリに反映された順」。新しく載ったものが上、以前からあるものが下。
+   同じ回に載ったものどうしは、その日の掲載順（データの並び）をそのまま保つ。 */
+const SEEN_KEY = "mybiz_seen_v1";
+function loadSeen(){ try{ return JSON.parse(localStorage.getItem(SEEN_KEY)||"{}"); }catch(e){ return {}; } }
+function sortByPublishedToApp(list, generatedAt){
+  const seen = loadSeen();
+  const batch = Date.parse(generatedAt||"") || Date.now();   // 今回アプリに載った時刻
+  let changed = false;
+  (list||[]).forEach(a=>{
+    const key = a.headline || a.id;                          // idは毎回振り直されるので見出しで識別
+    if(!(key in seen)){ seen[key] = batch; changed = true; } // 初めて見た＝今回反映された
+  });
+  if(changed){ try{ localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); }catch(e){} }
   return (list||[]).map((a,i)=>({a,i}))
     .sort((x,y)=>{
-      const tx=Date.parse(x.a.datetime||""), ty=Date.parse(y.a.datetime||"");
-      const vx=isNaN(tx)?-Infinity:tx, vy=isNaN(ty)?-Infinity:ty;
-      if(vx!==vy) return vy-vx;      // 新しい順
-      return x.i-y.i;                // 同着は元の順
+      const vx = seen[x.a.headline||x.a.id] || 0, vy = seen[y.a.headline||y.a.id] || 0;
+      if(vx!==vy) return vy-vx;   // 後から載ったものが上
+      return x.i-y.i;             // 同じ回なら、その日の掲載順のまま
     })
     .map(o=>o.a);
 }
@@ -162,12 +172,12 @@ async function fetchData(url){ const r=await fetch(url+(url.includes("?")?"&":"?
 async function load(showToast){
   try{
     let d; try{ d=await fetchData(DATA_URL); }catch(e){ d=await fetchData(DATA_FALLBACK); }
-    ARTICLES=sortByDate(d.articles||[]); localStorage.setItem("mybiz_cache",JSON.stringify(d));
+    ARTICLES=sortByPublishedToApp(d.articles||[], d.generated_at); localStorage.setItem("mybiz_cache",JSON.stringify(d));
     document.getElementById("updated").textContent="最終更新 "+fmt(d.generated_at);
     buildTabs(); render(); if(showToast)toast("最新に更新しました");
   }catch(e){
     const c=localStorage.getItem("mybiz_cache");
-    if(c){ ARTICLES=sortByDate(JSON.parse(c).articles||[]); buildTabs(); render(); toast("オフライン：保存済みを表示"); }
+    if(c){ const j=JSON.parse(c); ARTICLES=sortByPublishedToApp(j.articles||[], j.generated_at); buildTabs(); render(); toast("オフライン：保存済みを表示"); }
     else { document.getElementById("list").innerHTML='<div class="empty">記事を読み込めませんでした。<br>通信環境を確認して「更新」を押してください。</div>'; }
   }
 }
