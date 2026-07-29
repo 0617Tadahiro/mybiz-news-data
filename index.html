@@ -80,11 +80,12 @@
   .thinking{color:#9aa2ad;font-size:13px}
   .empty{text-align:center;color:#9aa2ad;padding:70px 20px;font-size:14px}
   /* bottom floating nav */
-  .bnav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 12px);background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.16);border-radius:32px;display:flex;padding:7px 8px;z-index:80}
-  .bnav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:#9aa0a6;padding:6px 20px;border-radius:24px;cursor:pointer;font-weight:600}
-  .bnav button .ic{font-size:19px;line-height:1}
-  .bnav button.on{color:var(--navy)}
-  .bnav button.on .ic{transform:scale(1.05)}
+  .bnav{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 10px);transform:translateX(-50%);background:rgba(255,255,255,.94);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);box-shadow:0 3px 14px rgba(0,0,0,.13);border-radius:24px;display:flex;gap:2px;padding:4px;z-index:80;transition:opacity .22s,transform .22s}
+  .bnav button{border:0;background:none;display:flex;align-items:center;gap:5px;font-size:11.5px;color:#9aa0a6;padding:7px 13px;border-radius:20px;cursor:pointer;font-weight:700;white-space:nowrap}
+  .bnav button .ic{font-size:14px;line-height:1}
+  .bnav button.on{color:var(--navy);background:#eef1f6}
+  /* 記事を開いている間・下スクロール中は隠す */
+  .bnav.hide{opacity:0;transform:translateX(-50%) translateY(26px);pointer-events:none}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
   .toast.show{opacity:.95}
 </style>
@@ -102,7 +103,7 @@
   <div class="dwrap" id="detailBody"></div>
 </div>
 
-<div class="bnav">
+<div class="bnav" id="bnav">
   <button id="navTop" class="on" onclick="setMode('feed')"><span class="ic">🏠</span>トップ</button>
   <button id="navSaved" onclick="setMode('saved')"><span class="ic">★</span>保存</button>
   <button onclick="load(true)"><span class="ic">⟳</span>更新</button>
@@ -232,8 +233,12 @@ function openDetail(id){
     </div>`;
   document.getElementById("detail").classList.add("on"); window.scrollTo(0,0);
   document.getElementById("detail").scrollTo(0,0);
+  document.getElementById("bnav").classList.add("hide");   // 記事を開いたらナビを隠す
 }
-function closeDetail(){ document.getElementById("detail").classList.remove("on"); }
+function closeDetail(){
+  document.getElementById("detail").classList.remove("on");
+  document.getElementById("bnav").classList.remove("hide"); // 一覧に戻ったら出す
+}
 
 function toggleSave(id,inDetail){
   const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
@@ -258,6 +263,17 @@ async function ask(q,id){
 
 document.getElementById("backBtn").onclick=closeDetail;
 window.openDetail=openDetail; window.toggleSave=toggleSave; window.ask=ask; window.setCat=setCat; window.setMode=setMode; window.load=load;
+
+/* 一覧を下にスクロール中はナビを隠す（上に戻すと再表示） */
+let lastY = 0;
+window.addEventListener("scroll", ()=>{
+  const nav = document.getElementById("bnav");
+  if(document.getElementById("detail").classList.contains("on")) return; // 記事中は常に非表示のまま
+  const y = window.scrollY;
+  if(y > lastY + 8 && y > 120) nav.classList.add("hide");
+  else if(y < lastY - 8) nav.classList.remove("hide");
+  lastY = y;
+}, {passive:true});
 
 load(false);
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
