@@ -145,17 +145,29 @@ function md(src){
   return html;
 }
 
+/* 掲載日の新しい順に並べる（日付が無いものは末尾、元の並び順は保つ） */
+function sortByDate(list){
+  return (list||[]).map((a,i)=>({a,i}))
+    .sort((x,y)=>{
+      const tx=Date.parse(x.a.datetime||""), ty=Date.parse(y.a.datetime||"");
+      const vx=isNaN(tx)?-Infinity:tx, vy=isNaN(ty)?-Infinity:ty;
+      if(vx!==vy) return vy-vx;      // 新しい順
+      return x.i-y.i;                // 同着は元の順
+    })
+    .map(o=>o.a);
+}
+
 /* ====== データ ====== */
 async function fetchData(url){ const r=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"}); if(!r.ok)throw new Error("HTTP "+r.status); return r.json(); }
 async function load(showToast){
   try{
     let d; try{ d=await fetchData(DATA_URL); }catch(e){ d=await fetchData(DATA_FALLBACK); }
-    ARTICLES=d.articles||[]; localStorage.setItem("mybiz_cache",JSON.stringify(d));
+    ARTICLES=sortByDate(d.articles||[]); localStorage.setItem("mybiz_cache",JSON.stringify(d));
     document.getElementById("updated").textContent="最終更新 "+fmt(d.generated_at);
     buildTabs(); render(); if(showToast)toast("最新に更新しました");
   }catch(e){
     const c=localStorage.getItem("mybiz_cache");
-    if(c){ ARTICLES=JSON.parse(c).articles||[]; buildTabs(); render(); toast("オフライン：保存済みを表示"); }
+    if(c){ ARTICLES=sortByDate(JSON.parse(c).articles||[]); buildTabs(); render(); toast("オフライン：保存済みを表示"); }
     else { document.getElementById("list").innerHTML='<div class="empty">記事を読み込めませんでした。<br>通信環境を確認して「更新」を押してください。</div>'; }
   }
 }
