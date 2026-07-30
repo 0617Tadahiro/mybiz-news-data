@@ -32,7 +32,10 @@
   .item{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
   .item:active{opacity:.6}
   .item .txt{flex:1;min-width:0}
-  .item .ttl{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:16.5px;line-height:1.45;margin:0 0 9px;color:#141414;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .item .ttl{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:16.5px;line-height:1.45;margin:0 0 9px;color:#141414;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
+  /* 既読の記事は見出しを薄く */
+  .item.read .ttl{color:#a9aeb5}
+  .item.read .sub{color:#bcc1c7}
   .item .sub{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .item .tag{color:var(--tag);font-weight:700}
   .item .save-mini{margin-left:auto;border:0;background:none;font-size:18px;line-height:1;color:#cfd3d9;cursor:pointer}
@@ -195,12 +198,26 @@ function setMode(m){
 }
 
 /* ====== 一覧（日経ふう：見出し左・写真右） ====== */
+/* 既読の管理（見出しで識別。idは毎回振り直されるため） */
+const READ_KEY = "mybiz_read_v1";
+function loadRead(){ try{ return JSON.parse(localStorage.getItem(READ_KEY)||"[]"); }catch(e){ return []; } }
+let readList = loadRead();
+function isRead(a){ return readList.includes(a.headline||a.id); }
+function markRead(a){
+  const key = a.headline||a.id;
+  if(!readList.includes(key)){
+    readList.push(key);
+    if(readList.length>500) readList = readList.slice(-500);   // 増えすぎ防止
+    try{ localStorage.setItem(READ_KEY, JSON.stringify(readList)); }catch(e){}
+  }
+}
+
 function row(a){
   const thumb = a.image_url
     ? `<img class="thumb" src="${esc(a.image_url)}" loading="lazy" onerror="this.outerHTML='<div class=\\'phs\\' style=\\'background:${gradient(a.headline)}\\'><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>'">`
     : `<div class="phs" style="background:${gradient(a.headline)}"><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>`;
   const tag = (a.tags&&a.tags[0])?`<span class="tag">#${esc(a.tags[0])}</span>`:"";
-  return `<div class="item" onclick="openDetail('${a.id}')">
+  return `<div class="item ${isRead(a)?'read':''}" onclick="openDetail('${a.id}')">
     <div class="txt">
       <h3 class="ttl">${esc(a.headline)}</h3>
       <div class="sub"><span>${ago(a.datetime)||fmtd(a.datetime)}</span>${tag}
@@ -225,6 +242,7 @@ function render(){
 /* ====== 詳細 ====== */
 function openDetail(id){
   const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
+  markRead(a);   // 開いた＝既読
   const img = a.image_url
     ? `<img class="dimg" src="${esc(a.image_url)}" onerror="this.outerHTML='<div class=\\'dph\\' style=\\'background:${gradient(a.headline)}\\'></div>'">`
     : `<div class="dph" style="background:${gradient(a.headline)}"></div>`;
@@ -260,6 +278,7 @@ function openDetail(id){
 function closeDetail(){
   document.getElementById("detail").classList.remove("on");
   document.getElementById("bnav").classList.remove("hide"); // 一覧に戻ったら出す
+  render();                                                 // 既読の見た目を反映
 }
 
 function toggleSave(id,inDetail){
