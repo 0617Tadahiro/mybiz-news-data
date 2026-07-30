@@ -121,7 +121,8 @@ const DATA_FALLBACK = "https://raw.githubusercontent.com/0617Tadahiro/mybiz-news
 const AI_ENDPOINT = "https://weathered-cake-8d55mybiz-ai.617tadahiro-oka.workers.dev/";
 const SAVE_KEY = "mybiz_saved_v1";
 
-let ARTICLES = [], saved = loadSaved(), mode="feed", cat="主要";
+const ALL_TAB = "すべて";
+let ARTICLES = [], saved = loadSaved(), mode="feed", cat=ALL_TAB;
 
 function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)||"[]"); }catch(e){ return []; } }
 function persist(){ localStorage.setItem(SAVE_KEY, JSON.stringify(saved)); }
@@ -185,8 +186,12 @@ async function load(showToast){
   }
 }
 function buildTabs(){
-  const cats=["主要",...[...new Set(ARTICLES.map(a=>a.category).filter(Boolean))]];
-  document.getElementById("cattabs").innerHTML=cats.map(c=>`<button class="${c===cat?'on':''}" onclick="setCat('${esc(c)}')">${esc(c)}</button>`).join("");
+  const cats=[ALL_TAB,...[...new Set(ARTICLES.map(a=>a.category).filter(Boolean))].filter(c=>c!==ALL_TAB)];
+  if(!cats.includes(cat)) cat=ALL_TAB;   // 前回のタブが無くなっていたら「すべて」に戻す
+  document.getElementById("cattabs").innerHTML=cats.map(c=>{
+    const n = c===ALL_TAB ? ARTICLES.length : ARTICLES.filter(a=>a.category===c).length;
+    return `<button class="${c===cat?'on':''}" onclick="setCat('${esc(c)}')">${esc(c)} <span style="opacity:.55;font-weight:600">${n}</span></button>`;
+  }).join("");
 }
 function setCat(c){ cat=c; buildTabs(); render(); window.scrollTo(0,0); }
 function setMode(m){
@@ -228,7 +233,7 @@ function row(a){
   </div>`;
 }
 function render(){
-  let items = mode==="saved" ? saved : (cat==="主要"?ARTICLES:ARTICLES.filter(a=>a.category===cat));
+  let items = mode==="saved" ? saved : (cat===ALL_TAB ? ARTICLES : ARTICLES.filter(a=>a.category===cat));
   const el=document.getElementById("list");
   if(!items.length){
     el.innerHTML = mode==="saved"
