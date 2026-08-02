@@ -185,8 +185,14 @@ async function load(showToast){
     else { document.getElementById("list").innerHTML='<div class="empty">記事を読み込めませんでした。<br>通信環境を確認して「更新」を押してください。</div>'; }
   }
 }
+const CAT_ORDER = ["消費者向け","ビジネスモデル","学生・ビジコン","ホテル・観光","ディープテック"];
 function buildTabs(){
-  const cats=[ALL_TAB,...[...new Set(ARTICLES.map(a=>a.category).filter(Boolean))].filter(c=>c!==ALL_TAB)];
+  const found=[...new Set(ARTICLES.map(a=>a.category).filter(Boolean))].filter(c=>c!==ALL_TAB);
+  found.sort((a,b)=>{
+    const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib);   // 決めた順→未知のものは後ろ
+  });
+  const cats=[ALL_TAB,...found];
   if(!cats.includes(cat)) cat=ALL_TAB;   // 前回のタブが無くなっていたら「すべて」に戻す
   document.getElementById("cattabs").innerHTML=cats.map(c=>{
     const n = c===ALL_TAB ? ARTICLES.length : ARTICLES.filter(a=>a.category===c).length;
