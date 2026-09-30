@@ -1,5 +1,10 @@
 {
  "app": "Hotel Insight",
- "today": "2026-09-30",
- "dates": []
+ "today": "2026-10-01",
+ "dates": [
+  {
+   "date": "2026-09-30",
+   "count": 23
+  }
+ ]
 }
