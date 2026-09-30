@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "Hotel Insight",
+  "short_name": "Hotel Insight",
+  "description": "海外中心のホテル業界の動きを毎朝日本語で解説する自分専用アプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12383d",
+  "theme_color": "#12383d",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

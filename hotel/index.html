@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#ffffff" />
+<title>Hotel Insight</title>
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Hotel Insight" />
+<style>
+  :root{ --ink:#1a1a1a; --sub:#9aa0a6; --line:#ececec; --tag:#1b7a74; --navy:#12383d; --chipbg:#f0f2f5; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#fff}
+  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:96px}
+  .serif{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif}
+  a{color:inherit}
+  .wrap{max-width:720px;margin:0 auto}
+  /* header */
+  header{background:#fff;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+  .htop{max-width:720px;margin:0 auto;display:flex;align-items:baseline;justify-content:space-between;padding:12px 16px 2px}
+  .brand{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:21px;letter-spacing:.01em}
+  .htop .up{font-size:11px;color:var(--sub)}
+  .cattabs{max-width:720px;margin:0 auto;display:flex;gap:7px;overflow-x:auto;padding:8px 12px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .cattabs::-webkit-scrollbar{display:none}
+  .cattabs button{white-space:nowrap;border:0;background:var(--chipbg);color:#444;font-size:14px;font-weight:700;padding:7px 16px;border-radius:20px;cursor:pointer}
+  .cattabs button.on{background:var(--navy);color:#fff}
+  /* list rows */
+  .list{max-width:720px;margin:0 auto;padding:0 16px}
+  .item{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
+  .item:active{opacity:.6}
+  .item .txt{flex:1;min-width:0}
+  .item .ttl{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:16.5px;line-height:1.45;margin:0 0 9px;color:#141414;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
+  /* 既読の記事は見出しを薄く */
+  .item.read .ttl{color:#a9aeb5}
+  .item.read .sub{color:#bcc1c7}
+  .item .sub{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .item .tag{color:var(--tag);font-weight:700}
+  .item .save-mini{margin-left:auto;border:0;background:none;font-size:18px;line-height:1;color:#cfd3d9;cursor:pointer}
+  .item .save-mini.on{color:#e0a400}
+  .thumb{width:96px;height:96px;border-radius:9px;object-fit:cover;flex-shrink:0;background:#e6e9ee}
+  .phs{width:96px;height:96px;border-radius:9px;flex-shrink:0;display:flex;align-items:flex-end;padding:8px;color:#fff}
+  .phs span{font-size:10px;font-weight:700;line-height:1.2;opacity:.95}
+  /* detail */
+  .detail{display:none;background:#fff;position:fixed;inset:0;overflow-y:auto;z-index:60;-webkit-overflow-scrolling:touch}
+  .detail.on{display:block}
+  .dhead{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;display:flex;align-items:center;gap:8px}
+  .back{border:0;background:#f0f2f5;border-radius:10px;padding:8px 13px;font-size:14px;font-weight:700;cursor:pointer}
+  .dwrap{max-width:720px;margin:0 auto;padding:0 0 60px}
+  .dimg{width:100%;height:220px;object-fit:cover;display:block;background:#e6e9ee}
+  .dph{width:100%;height:170px;display:flex;align-items:flex-end;padding:16px;color:#fff}
+  .credit{font-size:10.5px;color:#b0b5bd;padding:6px 18px 0}
+  .credit a{color:#9099a3;text-decoration:underline}
+  .dcontent{padding:6px 18px 0}
+  .dcat{display:inline-block;background:var(--chipbg);color:#39424f;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:12px}
+  .dtitle{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:23px;line-height:1.45;margin:10px 0 8px}
+  .dmeta{font-size:12px;color:var(--sub);border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+  .dsum{background:#f8f9fb;border-left:3px solid var(--navy);border-radius:6px;padding:12px 14px;font-size:14px;line-height:1.7;color:#2b323c;margin-bottom:18px}
+  .body h2{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-size:17px;border-left:4px solid var(--navy);padding-left:9px;margin:22px 0 8px}
+  .body h3{font-size:15px;margin:16px 0 6px}
+  .body p{font-size:14.5px;line-height:1.9;margin:0 0 12px;color:#2a3038}
+  .body ul{padding-left:20px;margin:0 0 12px}
+  .body li{font-size:14.5px;line-height:1.8;margin-bottom:4px}
+  .sources{margin:18px 0;padding:14px;background:#f8f9fb;border-radius:10px}
+  .sources h4{margin:0 0 8px;font-size:13px;color:var(--sub)}
+  .sources a{display:block;font-size:13px;color:var(--tag);text-decoration:none;padding:4px 0;word-break:break-all}
+  .actions{display:flex;gap:10px;margin:16px 0}
+  .btn{flex:1;border:0;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-save{background:#fff;border:1.5px solid var(--navy);color:var(--navy)}
+  .btn-save.on{background:var(--navy);color:#fff}
+  .ai{margin:20px 0 10px;background:#f8f9fb;border:1px solid var(--line);border-radius:12px;padding:14px}
+  .ai h4{margin:0 0 4px;font-size:14px}
+  .ai .note{font-size:11px;color:#9aa2ad;margin:0 0 10px}
+  .qchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .qchips button{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px 11px;font-size:12px;cursor:pointer;color:#39424f}
+  .airow{display:flex;gap:8px}
+  .airow input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px;font-size:14px;background:#fff}
+  .airow button{border:0;background:var(--navy);color:#fff;border-radius:10px;padding:0 16px;font-size:14px;font-weight:700;cursor:pointer}
+  .aians{margin-top:12px;font-size:14px;line-height:1.75;color:#2a3038;white-space:pre-wrap}
+  .aians:empty{display:none}
+  .thinking{color:#9aa2ad;font-size:13px}
+  .empty{text-align:center;color:#9aa2ad;padding:70px 20px;font-size:14px}
+  /* bottom floating nav */
+  .bnav{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 10px);transform:translateX(-50%);background:rgba(255,255,255,.94);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);box-shadow:0 3px 14px rgba(0,0,0,.13);border-radius:24px;display:flex;gap:2px;padding:4px;z-index:80;transition:opacity .22s,transform .22s}
+  .bnav button{border:0;background:none;display:flex;align-items:center;gap:5px;font-size:11.5px;color:#9aa0a6;padding:7px 13px;border-radius:20px;cursor:pointer;font-weight:700;white-space:nowrap}
+  .bnav button .ic{font-size:14px;line-height:1}
+  .bnav button.on{color:var(--navy);background:#eef1f6}
+  /* 記事を開いている間・下スクロール中は隠す */
+  .bnav.hide{opacity:0;transform:translateX(-50%) translateY(26px);pointer-events:none}
+  .rg{font-size:10.5px;font-weight:700;color:#4f5a66;background:#eef1f4;padding:2px 7px;border-radius:10px;white-space:nowrap}
+  .item.read .rg{opacity:.6}
+  .otitle{font-size:12.5px;color:#7a828c;font-style:italic;margin:-2px 0 10px;line-height:1.5;word-break:break-word}
+  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
+  .toast.show{opacity:.95}
+</style>
+</head>
+<body>
+<header>
+  <div class="htop"><div class="brand">Hotel Insight</div><div class="up" id="updated"></div></div>
+  <div class="cattabs" id="cattabs"></div>
+</header>
+
+<div class="list" id="list"></div>
+
+<div class="detail" id="detail">
+  <div class="dhead"><button class="back" id="backBtn">← 一覧へ</button></div>
+  <div class="dwrap" id="detailBody"></div>
+</div>
+
+<div class="bnav" id="bnav">
+  <button id="navTop" class="on" onclick="setMode('feed')"><span class="ic">🏠</span>トップ</button>
+  <button id="navSaved" onclick="setMode('saved')"><span class="ic">★</span>保存</button>
+  <button onclick="load(true)"><span class="ic">⟳</span>更新</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====== 設定 ====== */
+const DATA_URL   = "./articles.json";
+const DATA_FALLBACK = "https://raw.githubusercontent.com/0617Tadahiro/mybiz-news-data/main/hotel/articles.json";
+const AI_ENDPOINT = "https://weathered-cake-8d55mybiz-ai.617tadahiro-oka.workers.dev/";
+const SAVE_KEY = "hotel_saved_v1";
+
+const ALL_TAB = "すべて";
+let ARTICLES = [], saved = loadSaved(), mode="feed", cat=ALL_TAB;
+
+function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)||"[]"); }catch(e){ return []; } }
+function persist(){ localStorage.setItem(SAVE_KEY, JSON.stringify(saved)); }
+function isSaved(id){ return saved.some(a=>a.id===id); }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); }
+function gradient(seed){ const h=[...(seed||"x")].reduce((a,c)=>a+c.charCodeAt(0),0); const a=h%360,b=(a+40)%360; return `linear-gradient(135deg,hsl(${a} 45% 32%),hsl(${b} 55% 22%))`; }
+function ago(iso){ if(!iso)return""; const d=new Date(iso); const s=(Date.now()-d.getTime())/1000; if(isNaN(s))return ""; if(s<3600)return Math.max(1,Math.floor(s/60))+"分前"; if(s<86400)return Math.floor(s/3600)+"時間前"; return Math.floor(s/86400)+"日前"; }
+function fmtd(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return (iso||"").slice(0,10); return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`; }
+function fmt(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return iso.slice(0,10); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
+
+function md(src){
+  const lines=(src||"").split(/\r?\n/); let html=""; let inList=false;
+  const inline=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  for(let ln of lines){
+    if(/^\s*##\s+/.test(ln)){ if(inList){html+="</ul>";inList=false;} html+="<h2>"+inline(ln.replace(/^\s*##\s+/,""))+"</h2>"; continue; }
+    if(/^\s*###\s+/.test(ln)){ if(inList){html+="</ul>";inList=false;} html+="<h3>"+inline(ln.replace(/^\s*###\s+/,""))+"</h3>"; continue; }
+    if(/^\s*[-・]\s+/.test(ln)){ if(!inList){html+="<ul>";inList=true;} html+="<li>"+inline(ln.replace(/^\s*[-・]\s+/,""))+"</li>"; continue; }
+    if(/^\s*$/.test(ln)){ if(inList){html+="</ul>";inList=false;} continue; }
+    if(inList){html+="</ul>";inList=false;}
+    html+="<p>"+inline(ln)+"</p>";
+  }
+  if(inList)html+="</ul>";
+  return html;
+}
+
+/* 掲載順に並べる＝「アプリに反映された順」。新しく載ったものが上、以前からあるものが下。
+   同じ回に載ったものどうしは、その日の掲載順（データの並び）をそのまま保つ。 */
+const SEEN_KEY = "hotel_seen_v1";
+function loadSeen(){ try{ return JSON.parse(localStorage.getItem(SEEN_KEY)||"{}"); }catch(e){ return {}; } }
+function sortByPublishedToApp(list, generatedAt){
+  const seen = loadSeen();
+  const batch = Date.parse(generatedAt||"") || Date.now();   // 今回アプリに載った時刻
+  let changed = false;
+  (list||[]).forEach(a=>{
+    const key = a.headline || a.id;                          // idは毎回振り直されるので見出しで識別
+    if(!(key in seen)){ seen[key] = batch; changed = true; } // 初めて見た＝今回反映された
+  });
+  if(changed){ try{ localStorage.setItem(SEEN_KEY, JSON.stringify(seen)); }catch(e){} }
+  return (list||[]).map((a,i)=>({a,i}))
+    .sort((x,y)=>{
+      const vx = seen[x.a.headline||x.a.id] || 0, vy = seen[y.a.headline||y.a.id] || 0;
+      if(vx!==vy) return vy-vx;   // 後から載ったものが上
+      return x.i-y.i;             // 同じ回なら、その日の掲載順のまま
+    })
+    .map(o=>o.a);
+}
+
+/* ====== データ ====== */
+async function fetchData(url){ const r=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"}); if(!r.ok)throw new Error("HTTP "+r.status); return r.json(); }
+async function load(showToast){
+  try{
+    let d; try{ d=await fetchData(DATA_URL); }catch(e){ d=await fetchData(DATA_FALLBACK); }
+    ARTICLES=sortByPublishedToApp(d.articles||[], d.generated_at); localStorage.setItem("hotel_cache",JSON.stringify(d));
+    document.getElementById("updated").textContent="最終更新 "+fmt(d.generated_at);
+    buildTabs(); render(); if(showToast)toast("最新に更新しました");
+  }catch(e){
+    const c=localStorage.getItem("hotel_cache");
+    if(c){ const j=JSON.parse(c); ARTICLES=sortByPublishedToApp(j.articles||[], j.generated_at); buildTabs(); render(); toast("オフライン：保存済みを表示"); }
+    else { document.getElementById("list").innerHTML='<div class="empty">記事を読み込めませんでした。<br>通信環境を確認して「更新」を押してください。</div>'; }
+  }
+}
+const CAT_ORDER = ["AI・テック","予約・流通","収益・価格","人材・運営","ゲスト・旅行者","ブランド・経営","不動産・投資","規制・サステナ"];
+function buildTabs(){
+  const found=[...new Set(ARTICLES.map(a=>a.category).filter(Boolean))].filter(c=>c!==ALL_TAB);
+  found.sort((a,b)=>{
+    const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib);   // 決めた順→未知のものは後ろ
+  });
+  const cats=[ALL_TAB,...found];
+  if(!cats.includes(cat)) cat=ALL_TAB;   // 前回のタブが無くなっていたら「すべて」に戻す
+  document.getElementById("cattabs").innerHTML=cats.map(c=>{
+    const n = c===ALL_TAB ? ARTICLES.length : ARTICLES.filter(a=>a.category===c).length;
+    return `<button class="${c===cat?'on':''}" onclick="setCat('${esc(c)}')">${esc(c)} <span style="opacity:.55;font-weight:600">${n}</span></button>`;
+  }).join("");
+}
+function setCat(c){ cat=c; buildTabs(); render(); window.scrollTo(0,0); }
+function setMode(m){
+  mode=m;
+  document.getElementById("navTop").classList.toggle("on",m==="feed");
+  document.getElementById("navSaved").classList.toggle("on",m==="saved");
+  document.getElementById("cattabs").style.display = m==="feed" ? "flex" : "none";
+  render(); window.scrollTo(0,0);
+}
+
+/* ====== 一覧（日経ふう：見出し左・写真右） ====== */
+/* 既読の管理（見出しで識別。idは毎回振り直されるため） */
+const READ_KEY = "hotel_read_v1";
+function loadRead(){ try{ return JSON.parse(localStorage.getItem(READ_KEY)||"[]"); }catch(e){ return []; } }
+let readList = loadRead();
+function isRead(a){ return readList.includes(a.headline||a.id); }
+function markRead(a){
+  const key = a.headline||a.id;
+  if(!readList.includes(key)){
+    readList.push(key);
+    if(readList.length>500) readList = readList.slice(-500);   // 増えすぎ防止
+    try{ localStorage.setItem(READ_KEY, JSON.stringify(readList)); }catch(e){}
+  }
+}
+
+function regionBadge(a){
+  const r=(a.region||"").trim();
+  if(!r) return "";
+  const icon = r==="国内" ? "🇯🇵" : "🌏";
+  return `<span class="rg">${icon}${esc(r)}${a.country&&r!=="国内"?"・"+esc(a.country):""}</span>`;
+}
+function row(a){
+  const thumb = a.image_url
+    ? `<img class="thumb" src="${esc(a.image_url)}" loading="lazy" onerror="this.outerHTML='<div class=\\'phs\\' style=\\'background:${gradient(a.headline)}\\'><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>'">`
+    : `<div class="phs" style="background:${gradient(a.headline)}"><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>`;
+  const tag = (a.tags&&a.tags[0])?`<span class="tag">#${esc(a.tags[0])}</span>`:"";
+  return `<div class="item ${isRead(a)?'read':''}" onclick="openDetail('${a.id}')">
+    <div class="txt">
+      <h3 class="ttl">${esc(a.headline)}</h3>
+      <div class="sub">${regionBadge(a)}<span>${ago(a.datetime)||fmtd(a.datetime)}</span>${tag}
+        <button class="save-mini ${isSaved(a.id)?'on':''}" onclick="event.stopPropagation();toggleSave('${a.id}')">${isSaved(a.id)?'★':'☆'}</button>
+      </div>
+    </div>
+    ${thumb}
+  </div>`;
+}
+function render(){
+  let items = mode==="saved" ? saved : (cat===ALL_TAB ? ARTICLES : ARTICLES.filter(a=>a.category===cat));
+  const el=document.getElementById("list");
+  if(!items.length){
+    el.innerHTML = mode==="saved"
+      ? '<div class="empty">まだ保存した記事はありません。<br>記事の☆で後から読めます。</div>'
+      : '<div class="empty">記事を準備中です。<br>毎朝6時ごろに最新の記事が並びます。</div>';
+    return;
+  }
+  el.innerHTML = items.map(row).join("");
+}
+
+/* ====== 詳細 ====== */
+function openDetail(id){
+  const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
+  markRead(a);   // 開いた＝既読
+  const img = a.image_url
+    ? `<img class="dimg" src="${esc(a.image_url)}" onerror="this.outerHTML='<div class=\\'dph\\' style=\\'background:${gradient(a.headline)}\\'></div>'">`
+    : `<div class="dph" style="background:${gradient(a.headline)}"></div>`;
+  const credit = a.image_credit ? `<div class="credit">📷 ${a.image_source_url?`<a href="${esc(a.image_source_url)}" target="_blank" rel="noopener">${esc(a.image_credit)}</a>`:esc(a.image_credit)}</div>`:"";
+  const srcs=(a.sources&&a.sources.length?a.sources:(a.source_url?[{name:a.source_name,url:a.source_url}]:[])).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">🔗 ${esc(s.name||s.url)}</a>`).join("");
+  document.getElementById("detailBody").innerHTML=`
+    ${img}${credit}
+    <div class="dcontent">
+      <span class="dcat">${esc(a.category||'')}</span>
+      <h1 class="dtitle">${esc(a.headline)}</h1>
+      ${a.original_title?`<div class="otitle">原題：${esc(a.original_title)}</div>`:""}
+      <div class="dmeta">${regionBadge(a)}　${esc(a.source_name||'')}　|　${fmtd(a.datetime)}</div>
+      <div class="dsum">${esc(a.summary_long||a.summary_short||'')}</div>
+      <div class="body">${md(a.body)}</div>
+      ${srcs?`<div class="sources"><h4>出典</h4>${srcs}</div>`:""}
+      <div class="actions"><button class="btn btn-save ${isSaved(a.id)?'on':''}" id="saveBtn" onclick="toggleSave('${a.id}',true)">${isSaved(a.id)?'★ 保存済み':'☆ 保存する'}</button></div>
+      <div class="ai">
+        <h4>🤖 この記事についてAIに質問</h4>
+        <p class="note">${AI_ENDPOINT?"気になる点を聞くと、記事内容をもとにAIが答えます。":"AI機能は準備中です。"}</p>
+        <div class="qchips">
+          <button onclick="ask('この記事の要点を3つ教えて','${a.id}')">要点は？</button>
+          <button onclick="ask('日本のホテルに当てはめるとどうなる？具体例も','${a.id}')">日本だとどうなる？</button>
+          <button onclick="ask('出てくる専門用語をやさしく解説して','${a.id}')">用語をやさしく</button>
+          <button onclick="ask('ホテルの現場で働く人は何をすればいい？','${a.id}')">現場で活かすには</button>
+          <button onclick="ask('この流れからどんな新規事業のチャンスがある？','${a.id}')">事業のチャンスは？</button>
+        </div>
+        <div class="airow"><input id="aiInput" placeholder="質問を入力…" onkeydown="if(event.key==='Enter')ask(this.value,'${a.id}')"><button onclick="ask(document.getElementById('aiInput').value,'${a.id}')">質問</button></div>
+        <div class="aians" id="aiAns"></div>
+      </div>
+    </div>`;
+  document.getElementById("detail").classList.add("on"); window.scrollTo(0,0);
+  document.getElementById("detail").scrollTo(0,0);
+  document.getElementById("bnav").classList.add("hide");   // 記事を開いたらナビを隠す
+}
+function closeDetail(){
+  document.getElementById("detail").classList.remove("on");
+  document.getElementById("bnav").classList.remove("hide"); // 一覧に戻ったら出す
+  render();                                                 // 既読の見た目を反映
+}
+
+function toggleSave(id,inDetail){
+  const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
+  if(isSaved(id)){ saved=saved.filter(x=>x.id!==id); toast("保存を解除しました"); }
+  else { saved.unshift(a); toast("保存しました"); }
+  persist(); render();
+  if(inDetail){ const b=document.getElementById("saveBtn"); if(b){ b.className="btn btn-save "+(isSaved(id)?"on":""); b.textContent=isSaved(id)?"★ 保存済み":"☆ 保存する"; } }
+}
+
+async function ask(q,id){
+  q=(q||"").trim(); if(!q)return;
+  const ans=document.getElementById("aiAns");
+  if(!AI_ENDPOINT){ ans.textContent="⚠️ AI機能はまだ設定されていません。"; return; }
+  const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id)||{};
+  ans.innerHTML='<span class="thinking">AIが考えています…</span>';
+  try{
+    const r=await fetch(AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q,title:a.headline,context:(a.summary_long||"")+"\n\n"+(a.body||"")})});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const d=await r.json(); ans.textContent=d.answer||d.text||"（回答を取得できませんでした）";
+  }catch(e){ ans.textContent="通信エラーで回答できませんでした。少し待って再度お試しください。"; }
+}
+
+document.getElementById("backBtn").onclick=closeDetail;
+window.openDetail=openDetail; window.toggleSave=toggleSave; window.ask=ask; window.setCat=setCat; window.setMode=setMode; window.load=load;
+
+/* 一覧を下にスクロール中はナビを隠す（上に戻すと再表示） */
+let lastY = 0;
+window.addEventListener("scroll", ()=>{
+  const nav = document.getElementById("bnav");
+  if(document.getElementById("detail").classList.contains("on")) return; // 記事中は常に非表示のまま
+  const y = window.scrollY;
+  if(y > lastY + 8 && y > 120) nav.classList.add("hide");
+  else if(y < lastY - 8) nav.classList.remove("hide");
+  lastY = y;
+}, {passive:true});
+
+load(false);
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
