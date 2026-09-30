@@ -100,6 +100,29 @@
   .facts span{flex:1;padding:7px 10px;color:#2a2826;word-break:break-word}
   .imgkind{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;margin-right:4px;background:#eee;color:#666}
   .imgkind.real{background:#f3e3dc;color:#9a4a30}
+  .thumbwrap{position:relative;width:96px;height:96px;border-radius:9px;overflow:hidden;flex-shrink:0}
+  .thumbwrap .thumb{width:100%;height:100%;border-radius:0;display:block}
+  .playbadge{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.62);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 7px}
+  .ytwrap{position:relative;width:100%;aspect-ratio:16/9;cursor:pointer;overflow:hidden}
+  .ytwrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .ytplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:66px;height:46px;border-radius:12px;background:rgba(230,0,0,.9);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center}
+  .ytframe{position:relative;width:100%;aspect-ratio:16/9;background:#000}
+  .ytframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .embedwrap{padding:12px 10px 2px;background:#fafafa;min-height:120px}
+  .gitem{margin:16px -18px 18px;padding:0}
+  .gitem .credit{padding:6px 18px 0}
+  .gitem .embedwrap{background:#faf8f5}
+  .gcap{font-size:12.5px;color:#5f5a54;padding:7px 18px 0;line-height:1.55}
+  .gtitle{font-size:14px;color:#5f5a54;margin:22px 0 4px}
+  .qfig{margin:16px 0 18px;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fafafa}
+  .qfig img{display:block;width:100%;height:auto;background:#eee}
+  .qfig figcaption{padding:8px 12px 10px;font-size:12px;line-height:1.55;color:#5b6470}
+  .qcap{display:block;color:#2a3038;font-weight:600;margin-bottom:3px}
+  .qsrc a{color:var(--tag)}
+  .qkind{display:inline-block;font-size:10px;font-weight:700;border:1px solid #c9ced6;border-radius:6px;padding:0 5px;margin-right:6px;color:#6b7480}
+  .qfig.qhero{margin:0;border:0;border-radius:0;border-bottom:1px solid var(--line)}
+  .efig{margin:16px -18px 18px;padding:0}
+  .efig .credit{padding:6px 18px 0}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
   .toast.show{opacity:.95}
 </style>
@@ -240,10 +263,115 @@ function regionBadge(a){
   const icon = r==="国内" ? "🇯🇵" : "🌏";
   return `<span class="rg">${icon}${esc(r)}${a.country&&r!=="国内"?"・"+esc(a.country):""}</span>`;
 }
+/* ====== 公式メディア（YouTube・Instagram・X の公式埋め込み）。無料素材写真は使わない ====== */
+function ytId(a){ const m=a.media||{}; return (m.type==="youtube" && /^[A-Za-z0-9_-]{11}$/.test(m.id||"")) ? m.id : ""; }
+function phsHTML(a){ return `<div class="phs" style="background:${gradient(a.headline)}"><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>`; }
+function mediaThumb(a){
+  const id=ytId(a);
+  if(!id) return phsHTML(a);
+  return `<div class="thumbwrap" style="background:${gradient(a.headline)}"><img class="thumb" src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" loading="lazy" alt="" onerror="this.style.display='none'"><span class="playbadge">▶ 動画</span></div>`;
+}
+function mediaBlock(a){
+  const m=a.media||{}; const id=ytId(a);
+  if(id) return `<div class="ytwrap" style="background:${gradient(a.headline)}" onclick="playYT(this,'${id}')"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" onerror="this.style.display='none'"><span class="ytplay">▶</span></div>`;
+  if(m.type==="instagram" && /^https:\/\/www\.instagram\.com\/(p|reel)\/[A-Za-z0-9_-]+\/?$/.test(m.url||""))
+    return `<div class="embedwrap"><blockquote class="instagram-media" data-instgrm-permalink="${esc(m.url)}" data-instgrm-version="14" style="margin:0 auto;max-width:540px;width:100%;min-width:260px"><a href="${esc(m.url)}" target="_blank" rel="noopener">Instagramで見る</a></blockquote></div>`;
+  if(m.type==="x" && /^https:\/\/(x|twitter)\.com\/[A-Za-z0-9_]+\/status\/\d+\/?$/.test(m.url||""))
+    return `<div class="embedwrap"><blockquote class="twitter-tweet" data-dnt="true" data-lang="ja"><a href="${esc(m.url.replace(/^https:\/\/x\.com/,'https://twitter.com'))}">Xで見る</a></blockquote></div>`;
+  return `<div class="dph" style="background:${gradient(a.headline)}"></div>`;
+}
+function mediaCredit(a){
+  const m=a.media||{}; const id=ytId(a);
+  const label={youtube:"公式YouTube",instagram:"公式Instagram",x:"公式X"}[m.type];
+  if(!label || (m.type==="youtube" && !id) || (m.type!=="youtube" && !m.url)) return "";
+  const url = m.type==="youtube" ? `https://www.youtube.com/watch?v=${id}` : m.url;
+  return `<div class="credit">${label}${m.owner?"："+esc(m.owner):""}　<a href="${esc(url)}" target="_blank" rel="noopener">元の投稿を開く</a></div>`;
+}
+function playYT(el,id){ el.outerHTML=`<div class="ytframe"><iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0" title="YouTube" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`; }
+function loadScript(src){ return new Promise(r=>{ if(document.querySelector(`script[src="${src}"]`)) return r(); const s=document.createElement("script"); s.src=src; s.async=true; s.onload=r; s.onerror=r; document.body.appendChild(s); }); }
+async function activateEmbeds(){
+  const box=document.getElementById("detailBody");
+  if(box.querySelector(".instagram-media")){ await loadScript("https://www.instagram.com/embed.js"); try{ window.instgrm && window.instgrm.Embeds.process(); }catch(e){} }
+  if(box.querySelector(".twitter-tweet")){ await loadScript("https://platform.twitter.com/widgets.js"); try{ window.twttr && window.twttr.widgets && window.twttr.widgets.load(box); }catch(e){} }
+}
+window.playYT=playYT;
+
+/* ====== デザイン版：公式の写真・動画を1記事に複数並べる ====== */
+function mediaItems(a){
+  const list = (Array.isArray(a.media_list) && a.media_list.length) ? a.media_list : (a.media ? [a.media] : []);
+  const seen = new Set(), out = [];
+  for(const m of list){ if(!m) continue; const k = m.url || m.id || ""; if(!k || seen.has(k)) continue; seen.add(k); out.push(m); }
+  return out;
+}
+function vimeoOK(m){ return m && m.type==="vimeo" && /^\d{5,12}$/.test(String(m.id||"")); }
+function vimeoFrame(m){ return `<div class="ytframe"><iframe src="https://player.vimeo.com/video/${m.id}?dnt=1" title="Vimeo" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen></iframe></div>`; }
+function vimeoCredit(m){ return vimeoOK(m) ? `<div class="credit">公式Vimeo${m.owner?"："+esc(m.owner):""}　<a href="https://vimeo.com/${m.id}" target="_blank" rel="noopener">元の投稿を開く</a></div>` : ""; }
+function mediaEmbed(m){
+  if(vimeoOK(m)) return vimeoFrame(m);
+  const h = mediaBlock({headline:"", media:m});
+  return h.includes('class="dph"') ? "" : h;
+}
+function galleryItem(m){
+  const e = mediaEmbed(m); if(!e) return "";
+  return `<figure class="gitem">${e}${m.caption?`<div class="gcap">${esc(m.caption)}</div>`:""}${mediaCredit({media:m}) || vimeoCredit(m)}</figure>`;
+}
+function heroMedia(a){ return mediaItems(a)[0] || {}; }
+function heroHTML(a){ const m = heroMedia(a); return vimeoOK(m) ? vimeoFrame(m) : mediaBlock(Object.assign({}, a, {media:m})); }
+function heroCredit(a){ const m = heroMedia(a); return mediaCredit({media:m}) || vimeoCredit(m); }
+function designThumb(a){ return mediaThumb(Object.assign({}, a, {media: heroMedia(a)})); }
+function bodyWithGallery(a){
+  const items = mediaItems(a).slice(heroQuote(a) ? 0 : 1).map(galleryItem).filter(Boolean);   // 1件目は記事トップで使用
+  const html = withQuotes(md(a.body), a);
+  if(!items.length) return html;
+  const parts = html.split("<h2>");                 // parts[1]=概要, [2]=コンセプト, [3]=空間と素材, [4]=体験と運営, [5]=何が新しいか
+  for(const [j,n] of [[3,2],[2,1],[4,1],[5,1]]){ if(j < parts.length){ for(let c=0; c<n && items.length; c++) parts[j] += items.shift(); } }
+  if(items.length){
+    const g = `<h3 class="gtitle">公式の写真・動画</h3>` + items.join("");
+    const t = parts.findIndex(x => x.startsWith("立場別の示唆"));
+    if(t > 1) parts[t-1] += g; else parts[parts.length-1] += g;
+  }
+  return parts.join("<h2>");
+}
+
+/* ====== 公式サイトの写真（引用・プレス素材）：本文の該当章に、出典付き・切り抜きなしで表示 ====== */
+function quoteFigure(q, hero){
+  if(!q || !/^https:\/\//.test(q.img||"") || !/^https?:\/\//.test(q.page||"")) return "";
+  const kind = q.kind==="プレス素材" ? "プレス素材" : "引用";
+  return `<figure class="qfig${hero?' qhero':''}"><img src="${esc(q.img)}" alt="${esc(q.caption||'')}" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>${q.caption?`<span class="qcap">${esc(q.caption)}</span>`:""}<span class="qsrc"><span class="qkind">${kind}</span>出典：<a href="${esc(q.page)}" target="_blank" rel="noopener">${esc(q.site||q.page)}</a>${q.credit?`（撮影・提供：${esc(q.credit)}）`:""}</span></figcaption></figure>`;
+}
+function withQuotes(html, a){
+  const hq = heroQuote(a);
+  const qs = Array.isArray(a.quote_photos) ? a.quote_photos.filter(q => q && q.img && q !== hq) : [];
+  if(!qs.length) return html;
+  const parts = html.split("<h2>");
+  for(const q of qs){
+    const fig = quoteFigure(q); if(!fig) continue;
+    const sec = String(q.section||"").replace(/^#+\s*/,"").trim();
+    let j = sec ? parts.findIndex((x,i) => i>0 && x.startsWith(sec)) : -1;
+    if(j < 1) j = parts.length > 1 ? 1 : 0;
+    parts[j] += fig;
+  }
+  return parts.join("<h2>");
+}
+
+/* ====== 公式サイトの写真を優先（1枚目を記事トップに。動画・投稿は本文へ回す） ====== */
+function heroQuote(a){
+  const qs = Array.isArray(a.quote_photos) ? a.quote_photos : [];
+  return qs.find(q => q && /^https:\/\//.test(q.img||"") && /^https?:\/\//.test(q.page||"")) || null;
+}
+function embedAfterFirst(html, a){
+  if(!heroQuote(a)) return html;
+  const m = a.media || {};
+  const block = mediaBlock(a);
+  if(block.includes('class="dph"')) return html;
+  const parts = html.split("<h2>");
+  const fig = `<figure class="efig">${block}${mediaCredit(a)}</figure>`;
+  if(parts.length > 1) parts[1] += fig; else parts[0] += fig;
+  return parts.join("<h2>");
+}
+
 function row(a){
-  const thumb = a.image_url
-    ? `<img class="thumb" src="${esc(a.image_url)}" loading="lazy" onerror="this.outerHTML='<div class=\\'phs\\' style=\\'background:${gradient(a.headline)}\\'><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>'">`
-    : `<div class="phs" style="background:${gradient(a.headline)}"><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>`;
+  const thumb = designThumb(a);
   const tag = (a.tags&&a.tags[0])?`<span class="tag">#${esc(a.tags[0])}</span>`:"";
   return `<div class="item ${isRead(a)?'read':''}" onclick="openDetail('${a.id}')">
     <div class="txt">
@@ -277,10 +405,8 @@ function factsBox(a){
 function openDetail(id){
   const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
   markRead(a);   // 開いた＝既読
-  const img = a.image_url
-    ? `<img class="dimg" src="${esc(a.image_url)}" onerror="this.outerHTML='<div class=\\'dph\\' style=\\'background:${gradient(a.headline)}\\'></div>'">`
-    : `<div class="dph" style="background:${gradient(a.headline)}"></div>`;
-  const credit = a.image_credit ? `<div class="credit"><span class="imgkind ${a.image_actual?'real':''}">${a.image_actual?'実物写真':'イメージ写真'}</span>${a.image_source_url?`<a href="${esc(a.image_source_url)}" target="_blank" rel="noopener">${esc(a.image_credit)}</a>`:esc(a.image_credit)}</div>`:"";
+  const img = heroQuote(a) ? quoteFigure(heroQuote(a), true) : heroHTML(a);
+  const credit = heroQuote(a) ? "" : heroCredit(a);
   const srcs=(a.sources&&a.sources.length?a.sources:(a.source_url?[{name:a.source_name,url:a.source_url}]:[])).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">🔗 ${esc(s.name||s.url)}</a>`).join("");
   document.getElementById("detailBody").innerHTML=`
     ${img}${credit}
@@ -292,7 +418,7 @@ function openDetail(id){
       <div class="dmeta">${regionBadge(a)}　${esc(a.source_name||'')}　|　${fmtd(a.datetime)}</div>
       ${factsBox(a)}
       <div class="dsum">${esc(a.summary_long||a.summary_short||'')}</div>
-      <div class="body">${md(a.body)}</div>
+      <div class="body">${bodyWithGallery(a)}</div>
       ${srcs?`<div class="sources"><h4>出典</h4>${srcs}</div>`:""}
       <div class="actions"><button class="btn btn-save ${isSaved(a.id)?'on':''}" id="saveBtn" onclick="toggleSave('${a.id}',true)">${isSaved(a.id)?'★ 保存済み':'☆ 保存する'}</button></div>
       <div class="ai">
@@ -309,14 +435,23 @@ function openDetail(id){
         <div class="aians" id="aiAns"></div>
       </div>
     </div>`;
-  document.getElementById("detail").classList.add("on"); window.scrollTo(0,0);
+  listScrollY = window.scrollY; document.getElementById("detail").classList.add("on"); pushDetailState(); activateEmbeds();
   document.getElementById("detail").scrollTo(0,0);
   document.getElementById("bnav").classList.add("hide");   // 記事を開いたらナビを隠す
 }
+/* 一覧のスクロール位置を覚えて、戻ったらそこへ戻す。端末の「戻る」でも一覧に戻る */
+let listScrollY = 0;
+function pushDetailState(){ try{ if(!(history.state && history.state.detail)) history.pushState({detail:1}, ""); }catch(e){} }
+function backToList(){ if(history.state && history.state.detail){ history.back(); } else { closeDetail(); } }
+window.addEventListener("popstate", ()=>{ if(document.getElementById("detail").classList.contains("on")) closeDetail(); });
+try{ if(history.state && history.state.detail) history.replaceState(null, ""); }catch(e){}
 function closeDetail(){
   document.getElementById("detail").classList.remove("on");
   document.getElementById("bnav").classList.remove("hide"); // 一覧に戻ったら出す
   render();                                                 // 既読の見た目を反映
+  const y = listScrollY; lastY = y;                         // 開く前の位置に戻す
+  window.scrollTo(0, y);
+  requestAnimationFrame(()=>{ lastY = y; window.scrollTo(0, y); });
 }
 
 function toggleSave(id,inDetail){
@@ -340,7 +475,7 @@ async function ask(q,id){
   }catch(e){ ans.textContent="通信エラーで回答できませんでした。少し待って再度お試しください。"; }
 }
 
-document.getElementById("backBtn").onclick=closeDetail;
+document.getElementById("backBtn").onclick=backToList;
 window.openDetail=openDetail; window.toggleSave=toggleSave; window.ask=ask; window.setCat=setCat; window.setMode=setMode; window.load=load;
 
 /* 一覧を下にスクロール中はナビを隠す（上に戻すと再表示） */
