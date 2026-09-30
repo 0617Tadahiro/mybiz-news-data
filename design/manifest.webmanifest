@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "Hotel Design Journal",
+  "short_name": "Design Journal",
+  "description": "世界と日本のホテルのデザイン・設計・企画を毎朝日本語で読み解く自分専用アプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#2e2b28",
+  "theme_color": "#2e2b28",
+  "orientation": "portrait",
+  "lang": "ja",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
