@@ -108,6 +108,10 @@
   .qfig.qhero{margin:0;border:0;border-radius:0;border-bottom:1px solid var(--line)}
   .efig{margin:16px -18px 18px;padding:0}
   .efig .credit{padding:6px 18px 0}
+  .datetabs{max-width:720px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:2px 12px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .datetabs::-webkit-scrollbar{display:none}
+  .datetabs button{white-space:nowrap;border:1px solid var(--line);background:transparent;color:#6b7480;font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:14px;cursor:pointer}
+  .datetabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
   .toast.show{opacity:.95}
 </style>
@@ -115,6 +119,7 @@
 <body>
 <header>
   <div class="htop"><div class="brand">MyBiz News</div><div class="up" id="updated"></div></div>
+  <div class="datetabs" id="datetabs"></div>
   <div class="cattabs" id="cattabs"></div>
 </header>
 
@@ -137,6 +142,10 @@
 /* ====== 設定 ====== */
 const DATA_URL   = "./articles.json";
 const DATA_FALLBACK = "https://raw.githubusercontent.com/0617Tadahiro/mybiz-news-data/main/articles.json";
+const ARCH_DIR   = "./archive/";
+const ARCH_INDEX = "./archive/index.json";
+const ARCH_FB_DIR  = "https://raw.githubusercontent.com/0617Tadahiro/mybiz-news-data/main/archive/";
+const ARCH_FALLBACK = "https://raw.githubusercontent.com/0617Tadahiro/mybiz-news-data/main/archive/index.json";
 const AI_ENDPOINT = "https://weathered-cake-8d55mybiz-ai.617tadahiro-oka.workers.dev/";
 const SAVE_KEY = "mybiz_saved_v1";
 
@@ -195,12 +204,12 @@ async function fetchData(url){ const r=await fetch(url+(url.includes("?")?"&":"?
 async function load(showToast){
   try{
     let d; try{ d=await fetchData(DATA_URL); }catch(e){ d=await fetchData(DATA_FALLBACK); }
-    ARTICLES=sortByPublishedToApp(d.articles||[], d.generated_at); localStorage.setItem("mybiz_cache",JSON.stringify(d));
-    document.getElementById("updated").textContent="最終更新 "+fmt(d.generated_at);
-    buildTabs(); render(); if(showToast)toast("最新に更新しました");
+    LATEST=d; curDate=""; localStorage.setItem("mybiz_cache",JSON.stringify(d));
+    applyDoc(d); loadEditions();
+    if(showToast)toast("最新に更新しました");
   }catch(e){
     const c=localStorage.getItem("mybiz_cache");
-    if(c){ const j=JSON.parse(c); ARTICLES=sortByPublishedToApp(j.articles||[], j.generated_at); buildTabs(); render(); toast("オフライン：保存済みを表示"); }
+    if(c){ const j=JSON.parse(c); LATEST=j; curDate=""; applyDoc(j); toast("オフライン：保存済みを表示"); }
     else { document.getElementById("list").innerHTML='<div class="empty">記事を読み込めませんでした。<br>通信環境を確認して「更新」を押してください。</div>'; }
   }
 }
@@ -224,6 +233,7 @@ function setMode(m){
   document.getElementById("navTop").classList.toggle("on",m==="feed");
   document.getElementById("navSaved").classList.toggle("on",m==="saved");
   document.getElementById("cattabs").style.display = m==="feed" ? "flex" : "none";
+  buildDateTabs();
   render(); window.scrollTo(0,0);
 }
 
@@ -311,6 +321,45 @@ function embedAfterFirst(html, a){
   if(parts.length > 1) parts[1] += fig; else parts[0] += fig;
   return parts.join("<h2>");
 }
+
+/* ====== 過去の記事（1週間分）：日付で切り替える ====== */
+let EDITIONS = [], curDate = "", LATEST = null;
+const ARCHCACHE = {};
+function fmtDay(s){ const p=String(s).split("-"); return p.length===3 ? (+p[1])+"/"+(+p[2]) : s; }
+function applyDoc(d){
+  ARTICLES = sortByPublishedToApp(d.articles||[], d.generated_at);
+  document.getElementById("updated").textContent =
+    curDate ? (fmtDay(curDate)+"の記事") : ("最終更新 "+fmt(d.generated_at));
+  buildTabs(); buildDateTabs(); render();
+}
+function buildDateTabs(){
+  const el=document.getElementById("datetabs"); if(!el) return;
+  if(!EDITIONS.length){ el.style.display="none"; return; }
+  el.style.display = mode==="feed" ? "flex" : "none";
+  const chips=[{d:"",l:"今日"}].concat(EDITIONS.map(e=>({d:e.date,l:fmtDay(e.date)})));
+  el.innerHTML = chips.map(c=>
+    `<button class="${c.d===curDate?'on':''}" onclick="setDate('${c.d}')">${c.l}</button>`).join("");
+}
+async function loadEditions(){
+  try{
+    let j; try{ j=await fetchData(ARCH_INDEX); }catch(e){ j=await fetchData(ARCH_FALLBACK); }
+    const today=((LATEST&&LATEST.generated_at)||"").slice(0,10);
+    EDITIONS=(j.dates||[]).filter(x=>x && x.date && x.date!==today);
+  }catch(e){ EDITIONS=[]; }
+  buildDateTabs();
+}
+async function setDate(dt){
+  if(dt===curDate) return;
+  if(!dt){ curDate=""; applyDoc(LATEST); window.scrollTo(0,0); return; }
+  if(ARCHCACHE[dt]){ curDate=dt; applyDoc(ARCHCACHE[dt]); window.scrollTo(0,0); return; }
+  try{
+    let d; try{ d=await fetchData(ARCH_DIR+dt+".json"); }
+    catch(e){ d=await fetchData(ARCH_FB_DIR+dt+".json"); }
+    if(!d || !d.articles) throw new Error("bad data");
+    ARCHCACHE[dt]=d; curDate=dt; applyDoc(d); window.scrollTo(0,0);
+  }catch(e){ toast("この日の記事を読み込めませんでした"); }
+}
+window.setDate=setDate;
 
 function row(a){
   const thumb = mediaThumb(a);

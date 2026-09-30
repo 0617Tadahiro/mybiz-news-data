@@ -16,6 +16,16 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
   const isHTML = req.mode === "navigate" || url.pathname.endsWith("/") || url.pathname.endsWith("index.html");
   const isData = url.pathname.endsWith("articles.json");
+  const isArchive = url.pathname.includes("/archive/") && url.pathname.endsWith(".json")
+                    && !url.pathname.endsWith("index.json");
+
+  // 過去の記事＝一度取ったらキャッシュから出す（中身は変わらない）
+  if (isArchive) {
+    e.respondWith(caches.match(req).then(m => m || fetch(req).then(r => {
+      const cp = r.clone(); caches.open(CACHE).then(c => c.put(req, cp)); return r;
+    })));
+    return;
+  }
 
   // アプリ本体(HTML)とデータ = ネット優先（最新を取りにいく／オフラインはキャッシュ）
   if (isHTML || isData) {
