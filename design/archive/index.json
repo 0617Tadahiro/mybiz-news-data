@@ -1,7 +1,11 @@
 {
  "app": "Hotel Design Journal",
- "today": "2026-10-05",
+ "today": "2026-10-07",
  "dates": [
+  {
+   "date": "2026-10-05",
+   "count": 22
+  },
   {
    "date": "2026-10-04",
    "count": 22
