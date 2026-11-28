@@ -122,6 +122,10 @@
   .note .nlabel{display:block;font-size:12.5px;font-weight:700;color:#9A7A2E;letter-spacing:.08em;margin-bottom:4px}
   .note .nttl{display:block;font-weight:700;font-size:16.5px;color:#333;margin-bottom:4px}
   .note p{font-size:16.5px;line-height:1.85;margin:0 0 .7em}
+  .terms{background:#F3F5F8;border-left:3px solid #8C97A6;padding:10px 14px 4px;margin:-.3em 0 1.4em}
+  .terms .tlabel{display:block;font-size:12.5px;font-weight:700;color:#5E6B7C;letter-spacing:.08em;margin-bottom:4px}
+  .terms p{font-size:16px;line-height:1.75;margin:0 0 .6em}
+  .terms b{color:#333}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
   .toast.show{opacity:.95}
 </style>
@@ -172,10 +176,14 @@ function fmtd(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return 
 function fmt(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return iso.slice(0,10); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
 
 function md(src){
-  const lines=(src||"").split(/\r?\n/); let html=""; let inList=false; let inNote=false;
+  const lines=(src||"").split(/\r?\n/); let html=""; let inList=false; let inNote=false; let inTerms=false;
   const inline=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
   const endNote=()=>{ if(inNote){ html+="</div>"; inNote=false; } };
+  const endTerms=()=>{ if(inTerms){ html+="</div>"; inTerms=false; } };
   for(let ln of lines){
+    const tm = ln.match(/^\s*\*\*用語\*\*\s*[：:]\s*〈([^〉]+)〉\s*(.*)$/);
+    if(tm){ if(inList){html+="</ul>";inList=false;} endNote(); if(!inTerms){ html+='<div class="terms"><span class="tlabel">用語</span>'; inTerms=true; } html+="<p><b>"+inline(tm[1])+"</b>："+inline(tm[2])+"</p>"; continue; }
+    endTerms();
     const nm = ln.match(/^\s*\*\*補足\*\*\s*[：:]\s*(?:〈([^〉]+)〉)?\s*(.*)$/);
     if(nm){ if(inList){html+="</ul>";inList=false;} endNote(); html+='<div class="note"><span class="nlabel">補足</span>'+(nm[1]?'<span class="nttl">'+inline(nm[1])+'</span>':'')+(nm[2]?"<p>"+inline(nm[2])+"</p>":""); inNote=true; continue; }
     if(inNote && (/^\s*$/.test(ln) || /^\s*#{2,3}\s+/.test(ln))) endNote();
@@ -188,7 +196,7 @@ function md(src){
     html+="<p>"+inline(ln)+"</p>";
   }
   if(inList)html+="</ul>";
-  endNote();
+  endNote(); endTerms();
   return html;
 }
 
