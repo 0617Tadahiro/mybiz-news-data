@@ -14,7 +14,7 @@
   :root{ --ink:#1a1a1a; --sub:#9aa0a6; --line:#ececec; --tag:#1b7a74; --navy:#12383d; --chipbg:#f0f2f5; }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:#fff}
-  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:96px}
+  body{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN",-apple-system,BlinkMacSystemFont,"Noto Sans JP","Noto Sans CJK JP",sans-serif;color:#333;-webkit-font-smoothing:antialiased;padding-bottom:96px}
   .serif{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif}
   a{color:inherit}
   .wrap{max-width:720px;margin:0 auto}
@@ -32,11 +32,11 @@
   .item{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:flex-start}
   .item:active{opacity:.6}
   .item .txt{flex:1;min-width:0}
-  .item .ttl{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:16.5px;line-height:1.45;margin:0 0 9px;color:#141414;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
+  .item .ttl{font-weight:700;font-size:18px;line-height:1.5;margin:0 0 9px;color:#333;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;transition:color .2s}
   /* 既読の記事は見出しを薄く */
   .item.read .ttl{color:#a9aeb5}
   .item.read .sub{color:#bcc1c7}
-  .item .sub{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .item .sub{font-size:13px;color:var(--sub);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .item .tag{color:var(--tag);font-weight:700}
   .item .save-mini{margin-left:auto;border:0;background:none;font-size:18px;line-height:1;color:#cfd3d9;cursor:pointer}
   .item .save-mini.on{color:#e0a400}
@@ -53,19 +53,21 @@
   .dph{width:100%;height:170px;display:flex;align-items:flex-end;padding:16px;color:#fff}
   .credit{font-size:10.5px;color:#b0b5bd;padding:6px 18px 0}
   .credit a{color:#9099a3;text-decoration:underline}
-  .dcontent{padding:6px 18px 0}
+  .dcontent{padding:0 18px 0}
   .dcat{display:inline-block;background:var(--chipbg);color:#39424f;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:12px}
-  .dtitle{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-weight:700;font-size:23px;line-height:1.45;margin:10px 0 8px}
-  .dmeta{font-size:12px;color:var(--sub);border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+  .dtitle{font-weight:700;font-size:25px;line-height:1.45;margin:18px 0 10px;color:#333}
+  .dmeta{font-size:14px;color:#666;line-height:1.6;margin:0 0 18px}
   .dsum{background:#f8f9fb;border-left:3px solid var(--navy);border-radius:6px;padding:12px 14px;font-size:14px;line-height:1.7;color:#2b323c;margin-bottom:18px}
-  .body h2{font-family:"Hiragino Mincho ProN","Noto Serif JP",serif;font-size:17px;border-left:4px solid var(--navy);padding-left:9px;margin:22px 0 8px}
-  .body h3{font-size:15px;margin:16px 0 6px}
-  .body p{font-size:14.5px;line-height:1.9;margin:0 0 12px;color:#2a3038}
+  .body h2{position:relative;font-size:19px;font-weight:700;line-height:1.5;color:#333;padding-left:16px;margin:2em 0 1em}
+  .body h2::before{content:"";position:absolute;left:0;top:0;width:4px;height:100%;background:#757575}
+  .body h3{font-size:18px;font-weight:700;margin:1.4em 0 .6em;color:#333}
+  .body{font-size:18px;line-height:1.9;color:#333;overflow-wrap:break-word}
+  .body p{font-size:18px;line-height:1.9;margin:0 0 1em;color:#333}
   .body ul{padding-left:20px;margin:0 0 12px}
-  .body li{font-size:14.5px;line-height:1.8;margin-bottom:4px}
-  .sources{margin:18px 0;padding:14px;background:#f8f9fb;border-radius:10px}
-  .sources h4{margin:0 0 8px;font-size:13px;color:var(--sub)}
-  .sources a{display:block;font-size:13px;color:var(--tag);text-decoration:none;padding:4px 0;word-break:break-all}
+  .body li{font-size:18px;line-height:1.85;margin-bottom:6px}
+  .sources{margin:2em 0 18px;padding:14px 0 0;border-top:1px solid var(--line)}
+  .sources h4{margin:0 0 8px;font-size:14px;color:#666}
+  .sources a{display:block;font-size:14px;color:#2d5a9a;text-decoration:none;padding:4px 0;word-break:break-all}
   .actions{display:flex;gap:10px;margin:16px 0}
   .btn{flex:1;border:0;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer}
   .btn-save{background:#fff;border:1.5px solid var(--navy);color:var(--navy)}
@@ -91,8 +93,8 @@
   .bnav.hide{opacity:0;transform:translateX(-50%) translateY(26px);pointer-events:none}
   .rg{font-size:10.5px;font-weight:700;color:#4f5a66;background:#eef1f4;padding:2px 7px;border-radius:10px;white-space:nowrap}
   .item.read .rg{opacity:.6}
-  .otitle{font-size:12.5px;color:#7a828c;font-style:italic;margin:-2px 0 10px;line-height:1.5;word-break:break-word}
-  .thumbwrap{position:relative;width:96px;height:96px;border-radius:9px;overflow:hidden;flex-shrink:0}
+  .otitle{font-size:13px;color:#888;margin:-4px 0 8px;line-height:1.5;word-break:break-word}
+  .thumbwrap{position:relative;width:104px;height:78px;border-radius:0;overflow:hidden;flex-shrink:0;background:#eee}
   .thumbwrap .thumb{width:100%;height:100%;border-radius:0;display:block}
   .playbadge{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.62);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 7px}
   .ytwrap{position:relative;width:100%;aspect-ratio:16/9;cursor:pointer;overflow:hidden}
@@ -102,19 +104,24 @@
   .ytframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .embedwrap{padding:12px 10px 2px;background:#fafafa;min-height:120px}
   .photobtn{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 18px 0;padding:11px;border-radius:12px;background:var(--navy);color:#fff;font-size:14px;font-weight:700;text-decoration:none}
-  .qfig{margin:16px 0 18px;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fafafa}
+  .qfig{margin:1.2em 0 1.6em;padding:0;background:transparent}
   .qfig img{display:block;width:100%;height:auto;background:#eee}
-  .qfig figcaption{padding:8px 12px 10px;font-size:12px;line-height:1.55;color:#5b6470}
-  .qcap{display:block;color:#2a3038;font-weight:600;margin-bottom:3px}
-  .qsrc a{color:var(--tag)}
+  .qfig figcaption{padding:7px 0 0;font-size:13px;line-height:1.65;color:#333}
+  .qcap{display:block;color:#333;margin-bottom:2px}
+  .qsrc{color:#666;font-size:12px}
+  .qsrc a{color:#666}
   .qkind{display:inline-block;font-size:10px;font-weight:700;border:1px solid #c9ced6;border-radius:6px;padding:0 5px;margin-right:6px;color:#6b7480}
-  .qfig.qhero{margin:0;border:0;border-radius:0;border-bottom:1px solid var(--line)}
+  .qfig.qhero{margin:0 0 1.6em}
   .efig{margin:16px -18px 18px;padding:0}
   .efig .credit{padding:6px 18px 0}
   .datetabs{max-width:720px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;padding:2px 12px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .datetabs::-webkit-scrollbar{display:none}
   .datetabs button{white-space:nowrap;border:1px solid var(--line);background:transparent;color:#6b7480;font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:14px;cursor:pointer}
   .datetabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .note{background:#FBF7EC;border-top:2px solid #C9A85C;padding:12px 16px 4px;margin:1.2em 0 1.6em}
+  .note .nlabel{display:block;font-size:12.5px;font-weight:700;color:#9A7A2E;letter-spacing:.08em;margin-bottom:4px}
+  .note .nttl{display:block;font-weight:700;font-size:16.5px;color:#333;margin-bottom:4px}
+  .note p{font-size:16.5px;line-height:1.85;margin:0 0 .7em}
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:22px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
   .toast.show{opacity:.95}
 </style>
@@ -123,7 +130,6 @@
 <header>
   <div class="htop"><div class="brand">Hotel Insight</div><div class="up" id="updated"></div></div>
   <div class="datetabs" id="datetabs"></div>
-  <div class="cattabs" id="cattabs"></div>
 </header>
 
 <div class="list" id="list"></div>
@@ -166,9 +172,14 @@ function fmtd(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return 
 function fmt(iso){ if(!iso)return""; const d=new Date(iso); if(isNaN(d))return iso.slice(0,10); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
 
 function md(src){
-  const lines=(src||"").split(/\r?\n/); let html=""; let inList=false;
+  const lines=(src||"").split(/\r?\n/); let html=""; let inList=false; let inNote=false;
   const inline=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  const endNote=()=>{ if(inNote){ html+="</div>"; inNote=false; } };
   for(let ln of lines){
+    const nm = ln.match(/^\s*\*\*補足\*\*\s*[：:]\s*(?:〈([^〉]+)〉)?\s*(.*)$/);
+    if(nm){ if(inList){html+="</ul>";inList=false;} endNote(); html+='<div class="note"><span class="nlabel">補足</span>'+(nm[1]?'<span class="nttl">'+inline(nm[1])+'</span>':'')+(nm[2]?"<p>"+inline(nm[2])+"</p>":""); inNote=true; continue; }
+    if(inNote && (/^\s*$/.test(ln) || /^\s*#{2,3}\s+/.test(ln))) endNote();
+    if(inNote){ html+="<p>"+inline(ln.replace(/^[\s　]+/,""))+"</p>"; continue; }
     if(/^\s*##\s+/.test(ln)){ if(inList){html+="</ul>";inList=false;} html+="<h2>"+inline(ln.replace(/^\s*##\s+/,""))+"</h2>"; continue; }
     if(/^\s*###\s+/.test(ln)){ if(inList){html+="</ul>";inList=false;} html+="<h3>"+inline(ln.replace(/^\s*###\s+/,""))+"</h3>"; continue; }
     if(/^\s*[-・]\s+/.test(ln)){ if(!inList){html+="<ul>";inList=true;} html+="<li>"+inline(ln.replace(/^\s*[-・]\s+/,""))+"</li>"; continue; }
@@ -177,6 +188,7 @@ function md(src){
     html+="<p>"+inline(ln)+"</p>";
   }
   if(inList)html+="</ul>";
+  endNote();
   return html;
 }
 
@@ -217,7 +229,8 @@ async function load(showToast){
   }
 }
 const CAT_ORDER = ["AI・テック","予約・流通","収益・価格","人材・運営","ゲスト・旅行者","ブランド・経営","不動産・投資","規制・サステナ"];
-function buildTabs(){
+function buildTabs(){ cat=ALL_TAB; }
+function buildTabs_unused(){
   const found=[...new Set(ARTICLES.map(a=>a.category).filter(Boolean))].filter(c=>c!==ALL_TAB);
   found.sort((a,b)=>{
     const ia=CAT_ORDER.indexOf(a), ib=CAT_ORDER.indexOf(b);
@@ -235,7 +248,6 @@ function setMode(m){
   mode=m;
   document.getElementById("navTop").classList.toggle("on",m==="feed");
   document.getElementById("navSaved").classList.toggle("on",m==="saved");
-  document.getElementById("cattabs").style.display = m==="feed" ? "flex" : "none";
   buildDateTabs();
   render(); window.scrollTo(0,0);
 }
@@ -265,8 +277,10 @@ function regionBadge(a){
 function ytId(a){ const m=a.media||{}; return (m.type==="youtube" && /^[A-Za-z0-9_-]{11}$/.test(m.id||"")) ? m.id : ""; }
 function phsHTML(a){ return `<div class="phs" style="background:${gradient(a.headline)}"><span>${esc((a.tags&&a.tags[0])||a.category||'NEWS')}</span></div>`; }
 function mediaThumb(a){
+  const hq=heroQuote(a);
+  if(hq) return `<div class="thumbwrap"><img class="thumb" src="${esc(hq.img)}" loading="lazy" alt="" onerror="this.closest('.thumbwrap').remove()"></div>`;
   const id=ytId(a);
-  if(!id) return phsHTML(a);
+  if(!id) return "";
   return `<div class="thumbwrap" style="background:${gradient(a.headline)}"><img class="thumb" src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" loading="lazy" alt="" onerror="this.style.display='none'"><span class="playbadge">▶ 動画</span></div>`;
 }
 function mediaBlock(a){
@@ -399,34 +413,19 @@ function render(){
 function openDetail(id){
   const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
   markRead(a);   // 開いた＝既読
-  const img = heroQuote(a) ? quoteFigure(heroQuote(a), true) : mediaBlock(a);
+  const mb = mediaBlock(a);
+  const img = heroQuote(a) ? quoteFigure(heroQuote(a), true) : (mb.includes('class="dph"') ? "" : `<figure class="qfig qhero">${mb}</figure>`);
   const credit = heroQuote(a) ? "" : mediaCredit(a);
-  const srcs=(a.sources&&a.sources.length?a.sources:(a.source_url?[{name:a.source_name,url:a.source_url}]:[])).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">🔗 ${esc(s.name||s.url)}</a>`).join("");
+  const srcs=(a.sources&&a.sources.length?a.sources:(a.source_url?[{name:a.source_name,url:a.source_url}]:[])).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name||s.url)}</a>`).join("");
   document.getElementById("detailBody").innerHTML=`
-    ${img}${credit}
-    ${(a.photo_url||a.source_url)?`<a class="photobtn" href="${esc(a.photo_url||a.source_url)}" target="_blank" rel="noopener">📷 元記事で写真を見る</a>`:""}
     <div class="dcontent">
-      <span class="dcat">${esc(a.category||'')}</span>
       <h1 class="dtitle">${esc(a.headline)}</h1>
       ${a.original_title?`<div class="otitle">原題：${esc(a.original_title)}</div>`:""}
-      <div class="dmeta">${regionBadge(a)}　${esc(a.source_name||'')}　|　${fmtd(a.datetime)}</div>
-      <div class="dsum">${esc(a.summary_long||a.summary_short||'')}</div>
+      <div class="dmeta">${fmtd(a.datetime)}${a.region?`　${esc(a.region==="国内"?"国内":(a.country||"海外"))}`:""}${a.source_name?`　出典：${esc(a.source_name)}`:""}</div>
+      ${img}${credit}
       <div class="body">${embedAfterFirst(withQuotes(md(a.body), a), a)}</div>
       ${srcs?`<div class="sources"><h4>出典</h4>${srcs}</div>`:""}
       <div class="actions"><button class="btn btn-save ${isSaved(a.id)?'on':''}" id="saveBtn" onclick="toggleSave('${a.id}',true)">${isSaved(a.id)?'★ 保存済み':'☆ 保存する'}</button></div>
-      <div class="ai">
-        <h4>🤖 この記事についてAIに質問</h4>
-        <p class="note">${AI_ENDPOINT?"気になる点を聞くと、記事内容をもとにAIが答えます。":"AI機能は準備中です。"}</p>
-        <div class="qchips">
-          <button onclick="ask('この記事の要点を3つ教えて','${a.id}')">要点は？</button>
-          <button onclick="ask('日本のホテルに当てはめるとどうなる？具体例も','${a.id}')">日本だとどうなる？</button>
-          <button onclick="ask('出てくる専門用語をやさしく解説して','${a.id}')">用語をやさしく</button>
-          <button onclick="ask('ホテルの現場で働く人は何をすればいい？','${a.id}')">現場で活かすには</button>
-          <button onclick="ask('この流れからどんな新規事業のチャンスがある？','${a.id}')">事業のチャンスは？</button>
-        </div>
-        <div class="airow"><input id="aiInput" placeholder="質問を入力…" onkeydown="if(event.key==='Enter')ask(this.value,'${a.id}')"><button onclick="ask(document.getElementById('aiInput').value,'${a.id}')">質問</button></div>
-        <div class="aians" id="aiAns"></div>
-      </div>
     </div>`;
   listScrollY = window.scrollY; document.getElementById("detail").classList.add("on"); pushDetailState(); activateEmbeds();
   document.getElementById("detail").scrollTo(0,0);
