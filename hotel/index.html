@@ -185,6 +185,7 @@ function md(src){
   const endNote=()=>{ if(inNote){ html+="</div>"; inNote=false; } };
   const endTerms=()=>{ if(inTerms){ html+="</div>"; inTerms=false; } };
   for(let ln of lines){
+    if(/^\s*\*\*体制\*\*\s*$/.test(ln)){ if(inList){html+="</ul>";inList=false;} endNote(); endTerms(); html+="<!--STRUCT-->"; continue; }
     const tm = ln.match(/^\s*\*\*用語\*\*\s*[：:]\s*〈([^〉]+)〉\s*(.*)$/);
     if(tm){ if(inList){html+="</ul>";inList=false;} endNote(); if(!inTerms){ html+='<div class="terms"><span class="tlabel">用語</span>'; inTerms=true; } html+="<p><b>"+inline(tm[1])+"</b>："+inline(tm[2])+"</p>"; continue; }
     endTerms();
@@ -421,6 +422,21 @@ function render(){
   el.innerHTML = items.map(row).join("");
 }
 
+
+/* 体制の枠：本文の「**体制**」の行の位置に置く。無ければ「背景」の章の終わりに置く */
+function structBox(a){
+  if(!a.structure) return "";
+  const items=a.structure.split(/\s*／\s*/).filter(Boolean).map(x=>{const m=x.match(/^([^：:]{1,8})[：:]\s*(.*)$/);return m?`<div class="sitem"><b>${esc(m[1])}</b>${esc(m[2])}</div>`:`<div class="sitem">${esc(x)}</div>`;}).join("");
+  return `<div class="struct"><span class="slabel">体制</span>${items}</div>`;
+}
+function placeStruct(html,a){
+  const box=structBox(a);
+  if(html.includes("<!--STRUCT-->")) return html.replace("<!--STRUCT-->",box).split("<!--STRUCT-->").join("");
+  if(!box) return html;
+  const i=html.indexOf("<h2>背景</h2>");
+  if(i>=0){ const j=html.indexOf("<h2>",i+5); return j>=0 ? html.slice(0,j)+box+html.slice(j) : html+box; }
+  return html+box;
+}
 /* ====== 詳細 ====== */
 function openDetail(id){
   const a=ARTICLES.find(x=>x.id===id)||saved.find(x=>x.id===id); if(!a)return;
@@ -435,8 +451,7 @@ function openDetail(id){
       ${a.original_title?`<div class="otitle">原題：${esc(a.original_title)}</div>`:""}
       <div class="dmeta">${fmtd(a.datetime)}${a.region?`　${esc(a.region==="国内"?"国内":(a.country||"海外"))}`:""}${a.source_name?`　出典：${esc(a.source_name)}`:""}</div>
       ${img}${credit}
-      ${a.structure?`<div class="struct"><span class="slabel">体制</span>${a.structure.split(/\s*／\s*/).filter(Boolean).map(x=>{const m=x.match(/^([^：:]{1,8})[：:]\s*(.*)$/);return m?`<div class="sitem"><b>${esc(m[1])}</b>${esc(m[2])}</div>`:`<div class="sitem">${esc(x)}</div>`;}).join("")}</div>`:""}
-      <div class="body">${embedAfterFirst(withQuotes(md(a.body), a), a)}</div>
+      <div class="body">${placeStruct(embedAfterFirst(withQuotes(md(a.body), a), a), a)}</div>
       ${srcs?`<div class="sources"><h4>出典</h4>${srcs}</div>`:""}
       <div class="actions"><button class="btn btn-save ${isSaved(a.id)?'on':''}" id="saveBtn" onclick="toggleSave('${a.id}',true)">${isSaved(a.id)?'★ 保存済み':'☆ 保存する'}</button></div>
     </div>`;
